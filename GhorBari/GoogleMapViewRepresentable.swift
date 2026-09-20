@@ -16,7 +16,7 @@ struct GoogleMapViewRepresentable: UIViewRepresentable {
             longitude: -84.3880,
             zoom: 12.0
         )
-        let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
+        let mapView = GMSMapView(frame: .zero, camera: camera)
         mapView.settings.compassButton = true
         mapView.settings.zoomGestures = true
         return mapView
@@ -26,3 +26,4 @@ struct GoogleMapViewRepresentable: UIViewRepresentable {
         // optional: dynamically update map here
     }
 }
+

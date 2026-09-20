@@ -1,183 +1,6 @@
-////
-////  PostListingView.swift
-////  GhorBari
-////
-////  Created by Zulfiqur on 5/30/25.
-////
-//
-//import Foundation
-//import SwiftUI
-//import MapKit
-//import PassKit
-//
-//struct PostListingView: View {
-//    @State private var title = ""
-//    @State private var price = ""
-//    @State private var description = ""
-//    @State private var address = ""
-//    @State private var selectedType: String = "Apartment"
-//    @State private var availableFrom = Date()
-//    @State private var minStay = ""
-//    @State private var maxStay = ""
-//    @State private var bedrooms = ""
-//    @State private var bathrooms = ""
-//    @State private var showPaymentSheet = false
-//
-//    let propertyTypes = ["Room", "Apartment", "Shared"]
-//
-//    var body: some View {
-//        NavigationView {
-//            ScrollView {
-//                VStack(spacing: 20) {
-//                    // Header
-//                    HStack {
-//                        Button("Cancel") {}
-//                            .foregroundColor(.green)
-//                        Spacer()
-//                        Text("Post a Rental").bold()
-//                        Spacer()
-//                        Button("Save Draft") {}
-//                            .foregroundColor(.green)
-//                    }
-//                    .padding()
-//
-//                    // Add Photos
-//                    VStack {
-//                        Image(systemName: "camera")
-//                            .font(.system(size: 32))
-//                            .padding(.bottom, 8)
-//                        Text("Add Photos (up to 5)")
-//                            .font(.headline)
-//                        Text("Tap to upload")
-//                            .font(.caption)
-//                            .foregroundColor(.gray)
-//                    }
-//                    .frame(maxWidth: .infinity)
-//                    .padding()
-//                    .background(Color.gray.opacity(0.1))
-//                    .cornerRadius(12)
-//                    .padding(.horizontal)
-//
-//                    // Title and Price
-//                    VStack(spacing: 12) {
-//                        TextField("Listing Title", text: $title)
-//                            .padding()
-//                            .background(Color(.systemGray6))
-//                            .cornerRadius(10)
-//
-//                        TextField("$ Price per month", text: $price)
-//                            .keyboardType(.numberPad)
-//                            .padding()
-//                            .background(Color(.systemGray6))
-//                            .cornerRadius(10)
-//                    }
-//                    .padding(.horizontal)
-//
-//                    // Property Type
-//                    HStack(spacing: 16) {
-//                        ForEach(propertyTypes, id: \.self) { type in
-//                            Button(action: {
-//                                selectedType = type
-//                            }) {
-//                                Text(type)
-//                                    .padding(.vertical, 8)
-//                                    .padding(.horizontal, 16)
-//                                    .background(selectedType == type ? Color.green : Color.gray.opacity(0.2))
-//                                    .foregroundColor(selectedType == type ? .white : .black)
-//                                    .cornerRadius(8)
-//                            }
-//                        }
-//                    }
-//                    .padding(.horizontal)
-//
-//                    // Description
-//                    TextEditor(text: $description)
-//                        .frame(height: 120)
-//                        .padding()
-//                        .background(Color(.systemGray6))
-//                        .cornerRadius(12)
-//                        .padding(.horizontal)
-//
-//                    // Map & Address
-//                    VStack(alignment: .leading, spacing: 8) {
-//                        Map(coordinateRegion: .constant(MKCoordinateRegion(
-//                            center: CLLocationCoordinate2D(latitude: 33.7490, longitude: -84.3880),
-//                            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-//                        )))
-//                        .frame(height: 160)
-//                        .cornerRadius(12)
-//
-//                        TextField("Enter address", text: $address)
-//                            .padding()
-//                            .background(Color(.systemGray6))
-//                            .cornerRadius(10)
-//                    }
-//                    .padding(.horizontal)
-//
-//                    // Dates and rooms
-//                    VStack(spacing: 12) {
-//                        DatePicker("Available from", selection: $availableFrom, displayedComponents: .date)
-//
-//                        HStack {
-//                            TextField("Minimum stay", text: $minStay)
-//                                .keyboardType(.numberPad)
-//                                .padding()
-//                                .background(Color(.systemGray6))
-//                                .cornerRadius(10)
-//
-//                            TextField("Maximum stay", text: $maxStay)
-//                                .keyboardType(.numberPad)
-//                                .padding()
-//                                .background(Color(.systemGray6))
-//                                .cornerRadius(10)
-//                        }
-//
-//                        HStack {
-//                            TextField("Bedrooms", text: $bedrooms)
-//                                .keyboardType(.numberPad)
-//                                .padding()
-//                                .background(Color(.systemGray6))
-//                                .cornerRadius(10)
-//
-//                            TextField("Bathrooms", text: $bathrooms)
-//                                .keyboardType(.numberPad)
-//                                .padding()
-//                                .background(Color(.systemGray6))
-//                                .cornerRadius(10)
-//                        }
-//                    }
-//                    .padding(.horizontal)
-//
-//                    // Submit with Apple Pay
-//                    PaymentButton(action: {
-//                        // You’ll wire this to Apple Pay logic
-//                        showPaymentSheet = true
-//                    })
-//                    .frame(height: 50)
-//                    .padding()
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//// Custom Apple Pay-style button
-//struct PaymentButton: View {
-//    var action: () -> Void
-//
-//    var body: some View {
-//        Button(action: action) {
-//            Text("Submit Listing – $5")
-//                .frame(maxWidth: .infinity)
-//                .padding()
-//                .background(Color.black)
-//                .foregroundColor(.white)
-//                .cornerRadius(12)
-//        }
-//    }
-//}
 import SwiftUI
 import MapKit
+import PhotosUI
 import Foundation
 
 struct PostListingView: View {
@@ -187,139 +10,250 @@ struct PostListingView: View {
     @State private var address = ""
     @State private var selectedType: String = "Apartment"
     @State private var availableFrom = Date()
-    @State private var minStay = ""
-    @State private var maxStay = ""
     @State private var bedrooms = ""
     @State private var bathrooms = ""
-    @State private var showPaymentSheet = false
+
+    // Photos
+    @State private var photoItems: [PhotosPickerItem] = []
+    @State private var images: [UIImage] = []
+
+    // UI State
+    @State private var showSuccess = false
+    @FocusState private var focusedField: Field?
+
+    enum Field: Hashable { case title, price, address, bedrooms, bathrooms }
 
     let propertyTypes = ["Room", "Apartment", "Shared"]
 
     var body: some View {
         ZStack {
-            Color.softBackground.ignoresSafeArea()
+            Color(.systemGroupedBackground).ignoresSafeArea()
+
             ScrollView {
                 VStack(spacing: 20) {
+                    // Header actions
                     HStack {
-                        Button("Cancel") {}
-                            .foregroundColor(.mint)
+                        Text("Post a Rental")
+                            .font(.title2.bold())
                         Spacer()
-                        Text("Post a Rental").bold()
-                        Spacer()
-                        Button("Save Draft") {}
+                        Button("Reset") { resetForm() }
                             .foregroundColor(.mint)
                     }
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.top, 8)
 
-                    VStack {
-                        Image(systemName: "camera")
-                            .font(.system(size: 32))
-                            .padding(.bottom, 8)
-                        Text("Add Photos (up to 5)")
-                            .font(.headline)
-                        Text("Tap to upload")
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                    // Photos Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("Photos")
+                                .font(.headline)
+                            Spacer()
+                            Text("Up to 5")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        PhotosPicker(selection: $photoItems, maxSelectionCount: 5, matching: .images) {
+                            HStack {
+                                Image(systemName: "camera")
+                                Text(images.isEmpty ? "Add Photos" : "Add More")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(12)
+                        }
+
+                        if !images.isEmpty {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 90), spacing: 10)], spacing: 10) {
+                                ForEach(Array(images.enumerated()), id: \.offset) { index, img in
+                                    ZStack(alignment: .topTrailing) {
+                                        Image(uiImage: img)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 100, height: 100)
+                                            .clipped()
+                                            .cornerRadius(10)
+                                        Button(action: { images.remove(at: index) }) {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundColor(.secondary)
+                                                .background(.ultraThinMaterial)
+                                                .clipShape(Circle())
+                                        }
+                                        .offset(x: 6, y: -6)
+                                    }
+                                }
+                            }
+                        }
                     }
-                    .frame(maxWidth: .infinity)
                     .padding()
                     .background(.ultraThinMaterial)
-                    .cornerRadius(12)
+                    .cornerRadius(16)
                     .padding(.horizontal)
 
-                    VStack(spacing: 12) {
+                    // Basic Info Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Basic Info")
+                            .font(.headline)
+
                         TextField("Listing Title", text: $title)
+                            .textContentType(.none)
+                            .submitLabel(.next)
+                            .focused($focusedField, equals: .title)
+                            .onSubmit { focusedField = .price }
                             .padding()
                             .background(.ultraThinMaterial)
                             .cornerRadius(10)
 
                         TextField("$ Price per month", text: $price)
                             .keyboardType(.numberPad)
+                            .focused($focusedField, equals: .price)
                             .padding()
                             .background(.ultraThinMaterial)
                             .cornerRadius(10)
-                    }
-                    .padding(.horizontal)
 
-                    HStack(spacing: 16) {
-                        ForEach(propertyTypes, id: \.self) { type in
-                            Button(action: { selectedType = type }) {
-                                Text(type)
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 16)
-                                    .background(selectedType == type ? Color.pastelMint : Color.gray.opacity(0.2))
-                                    .foregroundColor(.black)
-                                    .cornerRadius(8)
-                            }
+                        Picker("Property Type", selection: $selectedType) {
+                            ForEach(propertyTypes, id: \.self) { Text($0).tag($0) }
                         }
+                        .pickerStyle(.segmented)
+
+                        DatePicker("Available from", selection: $availableFrom, displayedComponents: .date)
+                            .datePickerStyle(.compact)
                     }
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
                     .padding(.horizontal)
 
-                    TextEditor(text: $description)
-                        .frame(height: 120)
+                    // Description Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Description")
+                            .font(.headline)
+                        TextEditor(text: $description)
+                            .frame(height: 120)
+                            .padding(8)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(12)
+                    }
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
+                    .padding(.horizontal)
+
+                    // Location Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Location")
+                            .font(.headline)
+                        TextField("Address", text: $address)
+                            .textContentType(.fullStreetAddress)
+                            .submitLabel(.done)
+                            .focused($focusedField, equals: .address)
+                            .padding()
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(10)
+
+                        HStack(spacing: 12) {
+                            TextField("Bedrooms", text: $bedrooms)
+                                .keyboardType(.numberPad)
+                                .focused($focusedField, equals: .bedrooms)
+                            TextField("Bathrooms", text: $bathrooms)
+                                .keyboardType(.numberPad)
+                                .focused($focusedField, equals: .bathrooms)
+                        }
                         .padding()
                         .background(.ultraThinMaterial)
-                        .cornerRadius(12)
-                        .padding(.horizontal)
+                        .cornerRadius(10)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Map(coordinateRegion: .constant(MKCoordinateRegion(
+                        Map(position: .constant(.region(MKCoordinateRegion(
                             center: CLLocationCoordinate2D(latitude: 33.7490, longitude: -84.3880),
                             span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-                        )))
+                        ))))
                         .frame(height: 160)
                         .cornerRadius(12)
-
-                        TextField("Enter address", text: $address)
-                            .padding()
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(10)
                     }
-                    .padding(.horizontal)
-
-                    VStack(spacing: 12) {
-                        DatePicker("Available from", selection: $availableFrom, displayedComponents: .date)
-
-                        HStack {
-                            TextField("Minimum stay", text: $minStay)
-                            TextField("Maximum stay", text: $maxStay)
-                        }
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(10)
-
-                        HStack {
-                            TextField("Bedrooms", text: $bedrooms)
-                            TextField("Bathrooms", text: $bathrooms)
-                        }
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(10)
-                    }
-                    .padding(.horizontal)
-
-                    PaymentButton(action: {
-                        showPaymentSheet = true
-                    })
-                    .frame(height: 50)
                     .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
+                    .padding(.horizontal)
+
+                    // Submit Button
+                    Button(action: submit) {
+                        Text("Submit Listing")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.pastelMint)
+                            .foregroundColor(.black)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 24)
+                    .disabled(!isFormValid)
+                    .opacity(isFormValid ? 1 : 0.6)
                 }
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { focusedField = nil }
+            }
+        }
+        .onChange(of: photoItems) { _, newItems in
+            Task { await loadImages(from: newItems) }
+        }
+        .sheet(isPresented: $showSuccess) {
+            VStack(spacing: 16) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(.green)
+                Text("Listing Submitted")
+                    .font(.title2.bold())
+                Text("Your listing has been submitted successfully.")
+                    .foregroundColor(.secondary)
+                Button("Done") { showSuccess = false }
+                    .padding(.top, 8)
+            }
+            .padding()
+            .presentationDetents([.fraction(0.35)])
+        }
+    }
+
+    private var isFormValid: Bool {
+        !title.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !price.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func resetForm() {
+        title = ""; price = ""; description = ""; address = ""
+        bedrooms = ""; bathrooms = ""; availableFrom = Date()
+        images.removeAll(); photoItems.removeAll()
+        focusedField = nil
+    }
+
+    private func submit() {
+        guard isFormValid else { return }
+        // Mock submit: show success and clear form
+        showSuccess = true
+        resetForm()
+    }
+
+    private func loadImages(from items: [PhotosPickerItem]) async {
+        images.removeAll()
+        for item in items.prefix(5) {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let img = UIImage(data: data) {
+                images.append(img)
             }
         }
     }
 }
 
-struct PaymentButton: View {
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text("Submit Listing – $5")
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.black)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-        }
+#Preview {
+    NavigationStack {
+        PostListingView()
     }
 }

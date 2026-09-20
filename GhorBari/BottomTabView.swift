@@ -8,44 +8,38 @@
 import SwiftUI
 
 struct BottomTabView: View {
+    @StateObject private var coordinator = ExploreCoordinator()
+    
     var body: some View {
-        TabView {
+        TabView(selection: $coordinator.selectedTabIndex) {
             NavigationView {
                 HomeView()
             }
+            .environmentObject(coordinator)
             .tabItem {
                 Label("Home", systemImage: "house.fill")
             }
-
-            NavigationView {
-                ExploreMapView()
-            }
-            .tabItem {
-                Label("Explore", systemImage: "map.fill")
-            }
-
+            .tag(0)
+            
             NavigationView {
                 PostListingView()
             }
+            .environmentObject(coordinator)
             .tabItem {
                 Label("Post", systemImage: "plus.circle")
             }
-
+            .tag(1)
+            
             NavigationView {
-                ListingsView()
+                ProfileView()
             }
-            .tabItem {
-                Label("Listings", systemImage: "list.bullet.rectangle")
-            }
-
-            NavigationView {
-                Text("Profile")
-                    .navigationTitle("Profile")
-            }
+            .environmentObject(coordinator)
             .tabItem {
                 Label("Profile", systemImage: "person.crop.circle")
             }
+            .tag(2)
         }
         .background(.ultraThinMaterial)
     }
 }
+

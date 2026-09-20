@@ -1,164 +1,180 @@
-
-
 import SwiftUI
 import MapKit
 import Foundation
 
 struct ListingDetailView: View {
     let listing: Listing
-    @Namespace private var glassNS
+
+    @State private var selectedPhotoIndex: Int = 0
+    @State private var isSaved: Bool = false
 
     var body: some View {
-        if #available(iOS 26.0, *) {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // 📸 Image carousel with layered glass effect
-                    ZStack(alignment: .bottomLeading) {
-                        TabView {
-                            ForEach(listing.photos, id: \.self) { photo in
-                                Image(photo)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(height: 280)
-                                    .clipped()
-                                    .glassEffect()
-                            }
-                        }
-                        .frame(height: 280)
-                        .tabViewStyle(PageTabViewStyle())
-                        .glassEffectID("listing-photos-\(listing.id)", in: glassNS)
-
-                        // Subtle gradient overlay
-                        LinearGradient(gradient: Gradient(colors: [.black.opacity(0.5), .clear]),
-                                       startPoint: .bottom, endPoint: .top)
-                            .frame(height: 100)
-                    }
-                    .cornerRadius(20)
-                    .padding(.horizontal)
-
-                    // 🧾 Main Info Glass Card
-                    GlassEffectContainer {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text(listing.title)
-                                .font(.title2.bold())
-
-                            Text(listing.price)
-                                .font(.title3)
-                                .foregroundColor(.green)
-
-                            HStack(spacing: 12) {
-                                Label("Midtown", systemImage: "mappin.and.ellipse")
-                                Label("1.2 miles away", systemImage: "location")
-                            }
-                            .font(.caption)
-                            .foregroundColor(.gray)
-
-                            Divider().background(.white.opacity(0.1))
-
-                            Text("About this property")
-                                .font(.headline)
-
-                            Text("Beautiful 2-bedroom apartment in the heart of Midtown. Recently renovated with modern amenities and stunning city views.")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-
-                            // 🗺️ Map
-                            Text("Location")
-                                .font(.headline)
-
-                            Map(coordinateRegion: .constant(MKCoordinateRegion(
-                                center: listing.coordinate,
-                                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                            )), interactionModes: [])
-                                .frame(height: 150)
-                                .cornerRadius(12)
-                                .glassEffect()
-                                .glassEffectID("map-\(listing.id)", in: glassNS)
-
-                            Text("123 Main Street, Midtown")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-
-                            // 🏡 Features
-                            Text("Features & Amenities")
-                                .font(.headline)
-
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                                Label("Furnished", systemImage: "bed.double.fill")
-                                Label("Wi-Fi Included", systemImage: "wifi")
-                                Label("No Pets", systemImage: "nosign")
-                                Label("Parking", systemImage: "parkingsign.circle")
-                                Label("Gym", systemImage: "figure.strengthtraining.traditional")
-                                Label("Pool", systemImage: "drop.fill")
-                            }
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-
-                            // 👤 Host Info
-                            HStack {
-                                Image(systemName: "person.circle.fill")
-                                    .resizable()
-                                    .frame(width: 44, height: 44)
-                                    .foregroundColor(.green)
-
-                                VStack(alignment: .leading) {
-                                    Text("John Smith")
-                                        .font(.headline)
-                                    Text("Usually responds within 1 hour")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                }
-
-                                Spacer()
-                            }
-
-                            // 📞 Buttons
-                            HStack(spacing: 12) {
-                                Button("Message") {}
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.green)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(12)
-
-                                Button("Call") {}
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.red)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(12)
-                            }
-
-                            Button("Save Listing") {}
+        ScrollView {
+            VStack(spacing: 20) {
+                // MARK: Photos Carousel
+                TabView(selection: $selectedPhotoIndex) {
+                    ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, photo in
+                        ZStack(alignment: .bottomLeading) {
+                            Image(photo)
+                                .resizable()
+                                .scaledToFill()
                                 .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(.ultraThinMaterial)
+                                .frame(height: 320)
+                                .clipped()
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.green, lineWidth: 1)
+                                    LinearGradient(
+                                        colors: [Color.black.opacity(0.35), .clear],
+                                        startPoint: .bottom,
+                                        endPoint: .top
+                                    )
                                 )
-                                .glassEffect()
-                                .glassEffectID("save-\(listing.id)", in: glassNS)
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(listing.price)
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color.black.opacity(0.45))
+                                    .clipShape(Capsule())
+
+                                Text(listing.title)
+                                    .font(.title2.bold())
+                                    .foregroundColor(.white)
+                                    .lineLimit(2)
+                                    .shadow(radius: 6)
+                            }
+                            .padding(16)
                         }
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(20)
-                        .glassEffect()
-                        .glassEffectID("main-detail-\(listing.id)", in: glassNS)
+                        .tag(index)
                     }
-                    .padding(.horizontal)
                 }
-                .padding(.top, 16)
+                .frame(height: 320)
+                .tabViewStyle(.page(indexDisplayMode: .automatic))
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .padding(.horizontal)
+
+                // MARK: Quick Facts / Actions
+                VStack(spacing: 16) {
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(listing.title)
+                                .font(.headline)
+                            Text(listing.price)
+                                .font(.title3.weight(.semibold))
+                                .foregroundColor(.green)
+                        }
+                        Spacer()
+                        Button(action: { isSaved.toggle() }) {
+                            Image(systemName: isSaved ? "heart.fill" : "heart")
+                                .font(.title2)
+                                .foregroundColor(isSaved ? .red : .primary)
+                                .padding(10)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                        }
+                    }
+
+                    HStack(spacing: 12) {
+                        Label("Great location", systemImage: "mappin.and.ellipse")
+                        Label("Verified host", systemImage: "checkmark.seal")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal)
+
+                // MARK: About
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("About this place")
+                        .font(.headline)
+                    Text(listing.description)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal)
+
+                // MARK: Features
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Features & Amenities")
+                        .font(.headline)
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                        Label("Furnished", systemImage: "bed.double")
+                        Label("Wi‑Fi", systemImage: "wifi")
+                        Label("Parking", systemImage: "parkingsign.circle")
+                        Label("Gym", systemImage: "figure.strengthtraining.traditional")
+                        Label("Laundry", systemImage: "washer")
+                        Label("No pets", systemImage: "pawprint.slash")
+                    }
+                    .foregroundColor(.secondary)
+                    .font(.subheadline)
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal)
+
+                // MARK: Map
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Location")
+                        .font(.headline)
+                    Map(position: .constant(.region(MKCoordinateRegion(
+                        center: listing.coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    )))) {
+                    }
+                    .frame(height: 150)
+                    .cornerRadius(12)
+
+                    Text("Approximate location")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal)
+
+                // MARK: Contact
+                HStack(spacing: 12) {
+                    Button(action: {}) {
+                        Label("Message", systemImage: "message.fill")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                    Button(action: {}) {
+                        Label("Call", systemImage: "phone.fill")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.black)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 24)
             }
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .glassEffectID("main-detail-\(listing.id)", in: glassNS)
-        } else {
-            // 🔙 Fallback for iOS < 26
-            ScrollView {
-                Text("This page requires iOS 26 for the Liquid Glass layout.")
-                    .padding()
-            }
+            .padding(.top, 12)
         }
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+        )
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+#Preview {
+    NavigationStack {
+        ListingDetailView(listing: sampleListings.first!)
     }
 }
